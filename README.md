@@ -28,88 +28,51 @@ For enhanced security, consider Asternic Call Center Stats PRO.
 
 ## Installation
 
-### 1. Clone the repository
+The repository includes an Issabel-aware installer. It reads the MySQL root
+password from `/etc/issabel.conf`, creates and configures the `qstatslite`
+database, installs the web application and parser, configures the Asterisk
+Manager user, registers the Issabel menu item, and adds the five-minute log
+parser cron job.
 
 ```bash
 cd /usr/src
-git clone https://github.com/asternic/asternic-stats-lite.git
-```
-
-### 2. Change to repo directory
-
-```bash
+git clone https://github.com/voipiran/asternic-stats-lite.git
 cd asternic-stats-lite
+chmod 755 install.sh
+./install.sh
 ```
 
-### 3. Database Setup
+The report is available at:
 
-#### Create Database
-```bash
-mysqladmin -u root -p create qstatslite
+```text
+https://<issabel-host>/queue-stats/
 ```
 
-#### Create Database Tables
-```bash
-mysql -u root -p qstatslite < sql/qstats.sql
+The installer uses the following Asterisk Manager credentials for the
+Asternic realtime views:
+
+```text
+User: phpconfig
+Secret: php[onfig
 ```
 
-#### Create MySQL User
-```bash
-mysql -u root -p -e "CREATE USER 'qstatsliteuser'@'localhost' IDENTIFIED by 'somepassword'"
-mysql -u root -p -e "GRANT select,insert,update,delete ON qstatslite.* TO qstatsliteuser"
-```
+It adds the account to `manager_custom.conf` when it is not already present
+and reloads Asterisk. Existing account definitions are preserved.
 
-### 4. File Placement
+## Manual Configuration
 
-Move HTML directory:
-```bash
-mv /usr/src/asternic-stats/html /var/www/html/queue-stats
-```
+If the automatic installer reports a warning, review
+`/var/log/asternic-stats-lite-install.log` and verify:
 
-Move Parselog directory:
-```bash
-mv /usr/src/asternic-stats/parselog /usr/local/parseloglite
-```
+- `/var/www/html/queue-stats/config.php`
+- `/usr/local/parseloglite/config.php`
+- `/etc/asterisk/manager_custom.conf`
+- `crontab -l`
 
-## Configuration
+The parser command installed by the script is:
 
-### Web Application Configuration
-Edit `/var/www/html/queue-stats/config.php`:
-
-```php
-$dbhost = 'localhost';
-$dbname = 'qstatslite';
-$dbuser = 'qstatsliteuser';
-$dbpass = 'somepassword';
-$manager_host = '127.0.0.1';
-$manager_user = 'admin';
-$manager_secret = 'admin';
-$language = 'es';
-```
-
-### Log Parser Configuration
-Edit `/usr/local/parseloglite/config.php`:
-
-```php
-$queue_log_dir = '/var/log/asterisk/';
-$queue_log_file = 'queue_log';
-$dbhost = 'localhost';
-$dbname = 'qstatslite';
-$dbuser = 'qstatsliteuser';
-$dbpass = 'somepassword';
-```
-
-## Log Parsing
-
-Set up a cron job to parse queue logs:
-
-```bash
-crontab -e
-```
-
-Add the following line:
-```
-0 * * * * php -q /usr/local/parseloglite/parselog.php convertlocal
+```text
+*/5 * * * * php -q /usr/local/parseloglite/parselog.php convertlocal
 ```
 
 ## Accessing Reports
