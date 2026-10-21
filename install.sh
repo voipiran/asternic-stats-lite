@@ -56,8 +56,14 @@ configure_database() {
     mysqladmin -u root -p"${db_password}" create "${DB_NAME}" 2>/dev/null || \
         mysql -u root -p"${db_password}" -e "SELECT 1 FROM information_schema.SCHEMATA WHERE SCHEMA_NAME='${DB_NAME}'" >/dev/null
 
-    log "Importing Asternic database schema"
-    mysql -u root -p"${db_password}" "${DB_NAME}" < "${SCRIPT_DIR}/sql/qstats.sql"
+    if mysql -u root -p"${db_password}" "${DB_NAME}" -e \
+        "SELECT 1 FROM information_schema.TABLES WHERE TABLE_SCHEMA='${DB_NAME}' AND TABLE_NAME='qagent' LIMIT 1" |
+        grep -q '^1$'; then
+        log "Asternic database schema already exists; preserving existing tables and data"
+    else
+        log "Importing Asternic database schema"
+        mysql -u root -p"${db_password}" "${DB_NAME}" < "${SCRIPT_DIR}/sql/qstats.sql"
+    fi
 
     log "Configuring Asternic database user"
     mysql -u root -p"${db_password}" -e \
@@ -81,6 +87,10 @@ install_files() {
     mkdir -p "${WEB_ROOT}" "${PARSELOG_ROOT}"
     cp -rf "${SCRIPT_DIR}/html/." "${WEB_ROOT}/"
     cp -rf "${SCRIPT_DIR}/parselog/." "${PARSELOG_ROOT}/"
+    touch "${WEB_ROOT}/css/voiz-asternic.css" \
+        "${WEB_ROOT}/css/vendor/persianDatepicker-default.css" \
+        "${WEB_ROOT}/js/jalali.js" \
+        "${WEB_ROOT}/js/vendor/persianDatepicker.min.js"
 
     local escaped_password
     escaped_password="$(sed_escape "$1")"
