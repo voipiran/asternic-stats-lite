@@ -48,6 +48,12 @@ The report is available at:
 https://<issabel-host>/queue-stats/
 ```
 
+The report filter uses the same Jalali datepicker used by VOIZ/Issabel. Dates
+are shown in the Persian calendar, converted to Gregorian only when querying
+the existing database timestamps, and displayed back in Jalali in the report
+headers, PDF cover pages, and daily distribution table. The `queue_log`
+parser remains Gregorian internally so existing Asterisk data is not changed.
+
 The installer uses the following Asterisk Manager credentials for the
 Asternic realtime views:
 

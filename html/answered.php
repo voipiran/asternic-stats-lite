@@ -217,8 +217,8 @@ while($row=$midb->fetch_row($res)) {
     $grandtotal_calls++;
 }
 
-$start_parts = preg_split("/ /", $start);
-$end_parts   = preg_split("/ /", $end);
+$start_parts = preg_split("/ /", $display_start);
+$end_parts   = preg_split("/ /", $display_end);
 
 $cover_pdf = $lang["$language"]['queue'].": ".$queue."\n";
 $cover_pdf.= $lang["$language"]['start'].": ".$start_parts[0]."\n";

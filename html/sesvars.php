@@ -80,13 +80,20 @@ if(isset($_SESSION['QSTATS']['agent'])) {
    $agent = $_SESSION['QSTATS']['agent'];
 }
 
-$fstart_year  = substr($start,0,4);
-$fstart_month = substr($start,5,2);
-$fstart_day = substr($start,8,2);
+$start_gregorian_parts = preg_split('/[-: ]/', $start);
+$end_gregorian_parts = preg_split('/[-: ]/', $end);
+$start_jalali = gregorian_to_jalali((int) $start_gregorian_parts[0], (int) $start_gregorian_parts[1], (int) $start_gregorian_parts[2]);
+$end_jalali = gregorian_to_jalali((int) $end_gregorian_parts[0], (int) $end_gregorian_parts[1], (int) $end_gregorian_parts[2]);
 
-$fend_year  = substr($end,0,4);
-$fend_month = substr($end,5,2);
-$fend_day = substr($end,8,2);
+$fstart_year  = $start_jalali[0];
+$fstart_month = $start_jalali[1];
+$fstart_day = $start_jalali[2];
+
+$fend_year  = $end_jalali[0];
+$fend_month = $end_jalali[1];
+$fend_day = $end_jalali[2];
+$display_start = jalali_from_gregorian_datetime($start);
+$display_end = jalali_from_gregorian_datetime($end);
 
 $timestamp_start = return_timestamp($start);
 $timestamp_end   = return_timestamp($end);

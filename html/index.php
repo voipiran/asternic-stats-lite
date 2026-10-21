@@ -35,7 +35,8 @@ $diff_to_monday = $start_today_ts - (($day - 1) * 86400);
 $begin_week_monday = date('Y-m-d 00:00:00',$diff_to_monday);
 $end_week_sunday   = date('Y-m-d 23:59:59',($diff_to_monday + (6 * 86400)));
 
-$end_year = date('Y');
+$today_jalali = gregorian_to_jalali((int) date('Y'), (int) date('n'), (int) date('j'));
+$end_year = $today_jalali[0];
 
 $begin_month = date('Y-m-01 00:00:00');
 $begin_month_ts = return_timestamp($begin_month);
@@ -86,6 +87,10 @@ while ($row = $midb->fetch_row($res)) {
 	<style type="text/css" media="screen">@import "css/tab.css";</style>
 	<style type="text/css" media="screen">@import "css/fixed-all.css";</style>
 	<script src="js/validmonth.js" type="text/javascript" language="javascript1.2"></script>
+	<script src="js/jalali.js" type="text/javascript"></script>
+	<script src="js/vendor/jquery-1.10.1.min.js" type="text/javascript"></script>
+	<script src="js/vendor/persianDatepicker.min.js" type="text/javascript"></script>
+	<link rel="stylesheet" href="css/vendor/persianDatepicker-default.css" type="text/css" />
 <script src="http://www.google-analytics.com/urchin.js" type="text/javascript">
 </script>
 <script type="text/javascript">
@@ -155,50 +160,13 @@ urchinTracker();
 			return false;
 		}
 
-		month_start = parseInt(document.forms[0].month1.value) + 1;
-		month_end   = parseInt(document.forms[0].month2.value) + 1;
-
-		fecha_s  = document.forms[0].year1.value  + '-';
-		if(String(month_start).length == 1) {
-			fecha_s += "0";
-		} 
-        fecha_s += month_start + '-';
-		if(String(document.forms[0].day1.value).length == 1) {
-			fecha_s += "0";
-		}
-        fecha_s += document.forms[0].day1.value   + ' ';
-		fecha_s += '00:00:00';
-
-		fecha_check_s = document.forms[0].year1.value;
-		if(String(month_start).length == 1) {
-			fecha_check_s += "0";
-		} 
-		fecha_check_s += month_start;
-		if(String(document.forms[0].day1.value).length == 1) {
-			fecha_check_s += "0";
-		}
-		fecha_check_s += document.forms[0].day1.value;
-
-		fecha_check_e = document.forms[0].year2.value;
-		if(String(month_end).length == 1) {
-			fecha_check_e += "0";
-		} 
-		fecha_check_e += month_end;
-		if(String(document.forms[0].day2.value).length == 1) {
-			fecha_check_e += "0";
-		}
-		fecha_check_e += document.forms[0].day2.value;
-
-		fecha_e  = document.forms[0].year2.value  + '-';
-		if(String(month_end).length == 1) {
-			fecha_e += "0";
-		} 
-        fecha_e += month_end + '-';
-		if(String(document.forms[0].day2.value).length == 1) {
-			fecha_e += "0";
-		}
-        fecha_e += document.forms[0].day2.value   + ' ';
-		fecha_e += '23:59:59';
+		var startGregorian = jalaliToGregorian(parseInt(document.forms[0].year1.value, 10), parseInt(document.forms[0].month1.value, 10), parseInt(document.forms[0].day1.value, 10));
+		var endGregorian = jalaliToGregorian(parseInt(document.forms[0].year2.value, 10), parseInt(document.forms[0].month2.value, 10), parseInt(document.forms[0].day2.value, 10));
+		var pad = function (value) { return value < 10 ? '0' + value : String(value); };
+		fecha_s = startGregorian[0] + '-' + pad(startGregorian[1]) + '-' + pad(startGregorian[2]) + ' 00:00:00';
+		fecha_e = endGregorian[0] + '-' + pad(endGregorian[1]) + '-' + pad(endGregorian[2]) + ' 23:59:59';
+		fecha_check_s = fecha_s.substr(0, 10).replace(/-/g, '');
+		fecha_check_e = fecha_e.substr(0, 10).replace(/-/g, '');
 
 		document.forms[0].start.value = fecha_s;
 		document.forms[0].end.value   = fecha_e;
@@ -212,13 +180,10 @@ urchinTracker();
 	}
 
 	function setdates(start,end) {
-		var start_year  = start.substr(0,4);
-		var start_month = start.substr(5,2);
-		var start_day   = start.substr(8,2);
-	
-		var end_year  = end.substr(0,4);
-		var end_month = end.substr(5,2);
-		var end_day   = end.substr(8,2);
+		var startGregorian = start.split(/[- :]/);
+		var startJalali = gregorianToJalali(parseInt(startGregorian[0], 10), parseInt(startGregorian[1], 10), parseInt(startGregorian[2], 10));
+		var endGregorian = end.split(/[- :]/);
+		var endJalali = gregorianToJalali(parseInt(endGregorian[0], 10), parseInt(endGregorian[1], 10), parseInt(endGregorian[2], 10));
 
 		dstart = MWJ_findSelect( "day1" ), mstart = MWJ_findSelect( "month1" ), ystart = MWJ_findSelect( "year1" );
 		dend   = MWJ_findSelect( "day2" ), mend   = MWJ_findSelect( "month2" ), yend   = MWJ_findSelect( "year2" );
@@ -229,18 +194,18 @@ urchinTracker();
 		for( var x = 0; x < 31; x++  ) { dstart.options[x] = new Option( x + 1, x + 1 ); }
 		for( var x = 0; x < 31; x++  ) { dend.options[x]   = new Option( x + 1, x + 1 ); }
 
-		x = start_day - 1;
-		y = end_day - 1;
+		x = startJalali[2] - 1;
+		y = endJalali[2] - 1;
 	    dstart.options[x].selected = true;
 	    dend.options[y].selected = true;
 		
-		x = start_month - 1;
-		y = end_month - 1;
+		x = startJalali[1] - 1;
+		y = endJalali[1] - 1;
 		mstart.options[x].selected = true;
 		mend.options[y].selected   = true;
 
 		for( var x = 0; x < ystart.options.length; x++ ) { 
-			if( ystart.options[x].value == '' + start_year + '' ) { 
+			if( ystart.options[x].value == '' + startJalali[0] + '' ) {
 				ystart.options[x].selected = true; 
 				if( window.opera && document.importNode ) { 
 					window.setTimeout('MWJ_findSelect( \''+ystart.name+'\' ).options['+x+'].selected = true;',0); 
@@ -248,7 +213,7 @@ urchinTracker();
 			} 
 		}
 		for( var x = 0; x < yend.options.length; x++ ) { 
-			if( yend.options[x].value == '' + end_year + '' ) { 
+			if( yend.options[x].value == '' + endJalali[0] + '' ) {
 				yend.options[x].selected = true; 
 				if( window.opera && document.importNode ) { 
 					window.setTimeout('MWJ_findSelect( \''+yend.name+'\' ).options['+x+'].selected = true;',0); 
@@ -256,6 +221,23 @@ urchinTracker();
 			} 
 		}
 
+	}
+
+	function syncJalaliDatepicker(inputId, dayId, monthId, yearId) {
+		var input = jQuery('#' + inputId);
+		input.persianDatepicker({
+			persianNumbers: true,
+			formatDate: '0D NM YYYY',
+			selectedDate: input.attr('data-jdate'),
+			onSelect: function () {
+				var value = String(input.attr('data-jdate') || '');
+				var parts = value.split('/');
+				if (parts.length !== 3) return;
+				jQuery('#' + yearId).val(parseInt(parts[0], 10));
+				jQuery('#' + monthId).val(parseInt(parts[1], 10));
+				jQuery('#' + dayId).val(parseInt(parts[2], 10));
+			}
+		});
 	}
 	</script>
 <!--[if gte IE 5.5000]>
@@ -410,6 +392,10 @@ echo "<a href=\"javascript:setdates('$begin_past2_month', '$end_month')\">".$lan
 <TR>
 <TD><?php echo $lang["$language"]['start']?></TD>
 <TD>
+        <input type="text" id="jalali_start_picker" class="jalali-report-picker"
+               value="<?php echo sprintf('%04d/%02d/%02d', $fstart_year, $fstart_month, $fstart_day); ?>"
+               data-jdate="<?php echo sprintf('%04d/%02d/%02d', $fstart_year, $fstart_month, $fstart_day); ?>"
+               readonly="readonly" />
         <select name="day1" size="1">
 		<?php 
 		for($a=1;$a<32;$a++) {
@@ -420,14 +406,14 @@ echo "<a href=\"javascript:setdates('$begin_past2_month', '$end_month')\">".$lan
 		?>
         </select>
 
-        <select name="month1" size="1" onchange="dateChange('day1','month1','year1');">
+        <select name="month1" size="1">
 		<?php
-		for($a=0;$a<12;$a++)
-		{
-		$amonth = $a+1;
+        $jalali_months = jalali_month_names();
+        for($a=1;$a<=12;$a++)
+        {
         echo "<option value='$a' ";
-		if ($fstart_month == $amonth) { echo "selected "; }
-		echo ">$yearp[$a]</option>\n";
+        if ($fstart_month == $a) { echo "selected "; }
+        echo ">".$jalali_months[$a - 1]."</option>\n";
 		}
 		?>
         </select>
@@ -436,7 +422,7 @@ echo "<a href=\"javascript:setdates('$begin_past2_month', '$end_month')\">".$lan
 		$start_year = $end_year - 5;
 		$super_start_year = $start_year - 50;
 		$super_end_year   = $end_year + 5;
-        echo "<select name='year1' size='1' onchange=\"checkMore( this, $start_year, $end_year, $super_start_year, $super_end_year );dateChange('day1','month1','year1');\">\n";
+        echo "<select name='year1' size='1'>\n";
 		echo "<option value=\"MWJ_DOWN\">".$lang["$language"]['lower']."</option>\n";
 		for($a=$start_year;$a<=$end_year;$a++)
 		{
@@ -451,6 +437,10 @@ echo "<a href=\"javascript:setdates('$begin_past2_month', '$end_month')\">".$lan
 <TR>
 <TD><?php echo $lang["$language"]['end']?></TD>
 <TD>
+        <input type="text" id="jalali_end_picker" class="jalali-report-picker"
+               value="<?php echo sprintf('%04d/%02d/%02d', $fend_year, $fend_month, $fend_day); ?>"
+               data-jdate="<?php echo sprintf('%04d/%02d/%02d', $fend_year, $fend_month, $fend_day); ?>"
+               readonly="readonly" />
         <select name="day2" size="1">
 		<?php 
 		for($a=1;$a<32;$a++) {
@@ -461,15 +451,14 @@ echo "<a href=\"javascript:setdates('$begin_past2_month', '$end_month')\">".$lan
 		?>
         </select>
 
-        <select name="month2" size="1" onchange="dateChange('day2','month2','year2');">
-		<?php
-		for($a=0;$a<12;$a++)
-		{
-		$amonth = $a+1;
+        <select name="month2" size="1">
+        <?php
+        for($a=1;$a<=12;$a++)
+        {
         echo "<option value='$a' ";
-		if ($fend_month == $amonth) { echo "selected "; }
-		echo ">$yearp[$a]</option>\n";
-		}
+        if ($fend_month == $a) { echo "selected "; }
+        echo ">".$jalali_months[$a - 1]."</option>\n";
+        }
 		?>
         </select>
 	
@@ -477,7 +466,7 @@ echo "<a href=\"javascript:setdates('$begin_past2_month', '$end_month')\">".$lan
 		$start_year = $end_year - 5;
 		$super_start_year = $start_year - 50;
 		$super_end_year   = $end_year + 5;
-        echo "<select name='year2' size='1' onchange=\"checkMore( this, $start_year, $end_year, $super_start_year, $super_end_year );dateChange('day2','month2','year2');\">\n";
+        echo "<select name='year2' size='1'>\n";
 		echo "<option value=\"MWJ_DOWN\">".$lang["$language"]['lower']."</option>\n";
 		for($a=$start_year;$a<=$end_year;$a++)
 		{
@@ -497,6 +486,12 @@ echo "<a href=\"javascript:setdates('$begin_past2_month', '$end_month')\">".$lan
 <BR>
 <INPUT TYPE=submit VALUE='<?php echo $lang["$language"]['display_report']?>' onClick='return envia();'>
 </form>
+<script type="text/javascript">
+jQuery(function () {
+    syncJalaliDatepicker('jalali_start_picker', 'day1', 'month1', 'year1');
+    syncJalaliDatepicker('jalali_end_picker', 'day2', 'month2', 'year2');
+});
+</script>
 		</div>
 	</div>
 </div>

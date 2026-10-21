@@ -19,6 +19,7 @@
     <http://www.gnu.org/licenses/>.
 */
 ?>
+<link rel="stylesheet" type="text/css" href="css/voiz-asternic.css" />
 <div id="sidebar">&nbsp;</div>
 <div id="content">
 <a id='0'></a>

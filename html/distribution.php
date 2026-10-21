@@ -126,8 +126,8 @@ if($midb->num_rows($res)>0) {
 }
 
 
-$start_parts = preg_split("/ /", $start);
-$end_parts   = preg_split("/ /", $end);
+$start_parts = preg_split("/ /", $display_start);
+$end_parts   = preg_split("/ /", $display_end);
 
 $cover_pdf = $lang["$language"]['queue'].": ".$queue."\n";
 $cover_pdf.= $lang["$language"]['start'].": ".$start_parts[0]."\n";
@@ -261,10 +261,12 @@ $cover_pdf.= $lang["$language"]['agent_logoff'].": ".$logoff."\n";
                     $percent_unans = number_format($percent_unans,2);
                     $average_call_duration_print = seconds2minutes($average_call_duration);
                     if($key<>"") {
-                    $linea_pdf = array($key,$ans_by_day["$key"],"$percent_ans ".$lang["$language"]['percent'],$unans_by_day["$key"],"$percent_unans ".$lang["$language"]['percent'],$average_call_duration_print,number_format($average_hold_duration,0),$login_by_day["$key"],$logout_by_day["$key"]);
+                    $display_key = jalali_from_gregorian_datetime($key);
+                    $display_key = preg_replace('/ .*/', '', $display_key);
+                    $linea_pdf = array($display_key,$ans_by_day["$key"],"$percent_ans ".$lang["$language"]['percent'],$unans_by_day["$key"],"$percent_unans ".$lang["$language"]['percent'],$average_call_duration_print,number_format($average_hold_duration,0),$login_by_day["$key"],$logout_by_day["$key"]);
 
                     echo "<tr $odd>\n";
-                    echo "<td>$key</td>\n";
+                    echo "<td>$display_key</td>\n";
                     echo "<td>".$ans_by_day["$key"]."</td>\n";
                     echo "<td>$percent_ans ".$lang["$language"]['percent']."</td>\n";
                     echo "<td>".$unans_by_day["$key"]."</td>\n";

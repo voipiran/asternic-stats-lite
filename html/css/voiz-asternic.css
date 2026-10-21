@@ -1,0 +1,57 @@
+html, body {
+    background: #f3f5f3;
+    color: #202124;
+    font-family: Tahoma, Arial, sans-serif;
+}
+
+#header {
+    background: #212121;
+    border-bottom: 3px solid #689f38;
+}
+
+#primary li span,
+#primary li a {
+    color: #f8fafc;
+}
+
+#primary li a:hover,
+#secondary li a:hover {
+    background: #689f38;
+    color: #202124;
+}
+
+#main, #contents {
+    background: #ffffff;
+}
+
+h2, h3 {
+    color: #202124;
+    border-bottom-color: #c5e1a5;
+}
+
+input[type="submit"],
+input[type="button"] {
+    background: #689f38;
+    border: 1px solid #558b2f;
+    color: #ffffff;
+    border-radius: 4px;
+    padding: 5px 12px;
+}
+
+input[type="submit"]:hover,
+input[type="button"]:hover {
+    background: #558b2f;
+}
+
+.jalali-report-picker {
+    width: 112px;
+    margin-left: 6px;
+    padding: 3px 6px;
+    border: 1px solid #8bc34a;
+    border-radius: 3px;
+    background: #f1f8e9;
+    color: #202124;
+    direction: rtl;
+    text-align: center;
+    cursor: pointer;
+}

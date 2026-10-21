@@ -1,6 +1,7 @@
 <?php
 require_once("dblib.php");
 require_once("misc.php");
+require_once("jalali.php");
 
 // Credentials for MYSQL database
 $dbhost = 'localhost';

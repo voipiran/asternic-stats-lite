@@ -107,8 +107,8 @@ $total_abandon = $abandoned + $timeout;
 }
 
 
-$start_parts = preg_split("/ /", $start);
-$end_parts   = preg_split("/ /", $end);
+$start_parts = preg_split("/ /", $display_start);
+$end_parts   = preg_split("/ /", $display_end);
 
 ?>
 <body>
